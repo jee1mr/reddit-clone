@@ -1,0 +1,11 @@
+.board-list-container {
+  padding: 3rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.board-list-container > div {
+  margin: 1rem;
+  min-width: 250px !important;
+}

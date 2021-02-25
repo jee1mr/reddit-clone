@@ -1,6 +1,9 @@
 from rest_framework import serializers, viewsets
 from rest_framework import permissions
 from board.models import Board
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 
 
 class BoardSerializer(serializers.HyperlinkedModelSerializer):
@@ -10,7 +13,7 @@ class BoardSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['name', 'is_member', 'is_moderator', 'is_banned']
+        fields = ['id', 'name', 'is_member', 'is_moderator', 'is_banned']
 
     def get_is_member(self, obj):
         user = self.get_user()
@@ -43,3 +46,10 @@ class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    @action(url_path='become-member', methods=['post'], detail=True)
+    def become_member(self, request, pk=None):
+        board = get_object_or_404(self.queryset, pk=pk)
+        if board.members.exists() and board.banned.exists():
+            return Response({'success': True})
+        board.members.add(request.user)
+        return Response({'success': True})
