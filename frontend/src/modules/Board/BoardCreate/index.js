@@ -5,62 +5,73 @@ import { Formik } from 'formik'
 import * as yup from 'yup'
 
 // UI
-import { Card, Space } from 'antd'
+import { Form, Input } from 'formik-antd'
+import { Button, message } from 'antd'
 
 // App Imports
 import './style.scss'
 import api from 'setup/api'
 import { apiUrl } from 'setup/helpers'
 import routesApi from 'setup/routesApi'
-import StoryCreateFormUI from './FormUI'
-import Logout from 'modules/Auth/Logout'
+import { queryClient } from 'App'
 
 const StoryCreate = () => {
   const history = useHistory()
   // Schema
   const schema = yup.object().shape({
-    summary: yup.string().required('Please enter a summary'),
-    description: yup.string().required('Please enter a description'),
-    type: yup.string().required('Please select a type'),
-    complexity: yup.string().required('Please select a complexity'),
-    estimatedHrs: yup.string().required('Please enter the time estimation'),
-    cost: yup.number().required('Please enter the cost'),
+    name: yup.string().required('Please enter a board name'),
   })
   // Form Submission
   const onSubmit = async (formData) => {
     try {
-      const { statusText } = await api.post(
-        apiUrl(routesApi.stories.path),
+      const { data, status } = await api.post(
+        apiUrl(routesApi.board.path),
         formData,
       )
-      if (statusText === 'Created') {
-        history.push('/user/story/list')
+
+      message.loading({
+        content: 'Creating board...',
+        key: 'createBoard',
+      })
+
+      if (status === 200) {
+        console.log('Created')
+        queryClient.invalidateQueries('boardList')
+        message.success({
+          content: `Successfully created ${data.name}`,
+          key: 'createBoard',
+          duration: 2,
+        })
+        // history.push(`/board/${board.id}`)
       }
     } catch (error) {
       console.error(error)
+    } finally {
     }
   }
 
   return (
-    <Space direction="vertical" size="large" className="user-story-create">
-      <Logout />
-      <Card className="story-create-card" title="Create a Story">
-        <Formik
-          validationSchema={schema}
-          initialValues={{
-            summary: '',
-            description: '',
-            type: 'enhancement',
-            complexity: 'low',
-            estimatedHrs: '0',
-            cost: 0,
-          }}
-          onSubmit={onSubmit}
-        >
-          <StoryCreateFormUI />
-        </Formik>
-      </Card>
-    </Space>
+    <Formik
+      validationSchema={schema}
+      initialValues={{
+        name: '',
+      }}
+      onSubmit={onSubmit}
+      enableReinitialize
+    >
+      <Form name="board-create-form" layout="inline">
+        <Form.Item name="name" required={true}>
+          <Input
+            name="name"
+            placeholder="Enter board name"
+            autoComplete="off"
+          />
+        </Form.Item>
+        <Button type="primary" htmlType="submit">
+          + Create Board
+        </Button>
+      </Form>
+    </Formik>
   )
 }
 

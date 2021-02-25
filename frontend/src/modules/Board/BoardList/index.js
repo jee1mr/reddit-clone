@@ -39,6 +39,8 @@ const BoardList = () => {
         <Header />
         <Card>
           <Skeleton />
+          <Skeleton />
+          <Skeleton />
         </Card>
       </>
     )

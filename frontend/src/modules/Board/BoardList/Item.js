@@ -3,7 +3,7 @@ import React from 'react'
 import { queryClient } from 'App'
 
 // UI
-import { Card, Button, Tag } from 'antd'
+import { Card, Button, Tag, message } from 'antd'
 import api from 'setup/api'
 import { apiUrl } from 'setup/helpers'
 import routesApi from 'setup/routesApi'
@@ -12,12 +12,18 @@ import routesApi from 'setup/routesApi'
 const BoardItem = ({ board }) => {
   // Become Member
   const becomeMember = async () => {
-    const { data } = await api.post(
-      apiUrl(routesApi.board.becomeMember(board.id)),
-    )
-    // Reload board list on success
-    if (data && data.success) {
-      queryClient.invalidateQueries('boardList')
+    try {
+      const { data } = await api.post(
+        apiUrl(routesApi.board.becomeMember(board.id)),
+      )
+      // Reload board list on success
+      if (data && data.success) {
+        queryClient.invalidateQueries('boardList')
+        message.success(`You are now a member of ${board.name}!`, 2)
+      }
+    } catch (error) {
+      console.log(error)
+      message.error('Something went wrong. Try again!')
     }
   }
 

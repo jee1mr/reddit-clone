@@ -10,7 +10,7 @@ import './style.css'
 const Header = () => {
   return (
     <div className="header">
-      {/* <CreateBoard /> */}
+      <CreateBoard />
       <Logout />
     </div>
   )

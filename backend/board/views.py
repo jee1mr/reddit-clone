@@ -46,6 +46,19 @@ class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def create(self, request):
+        try:
+            board = Board(name=request.data['name'], owner=request.user)
+            board.save()
+            board.members.add(request.user)
+            board.moderators.add(request.user)
+        except Exception as e:
+            if hasattr(e, 'message'):
+                return Response({"success": False, "error": e.message})
+            else:
+                return Response({"success": False, "error": str(e)})
+        return Response(BoardSerializer(board).data)
+
     @action(url_path='become-member', methods=['post'], detail=True)
     def become_member(self, request, pk=None):
         board = get_object_or_404(self.queryset, pk=pk)
@@ -53,3 +66,5 @@ class BoardViewSet(viewsets.ModelViewSet):
             return Response({'success': True})
         board.members.add(request.user)
         return Response({'success': True})
+
+
