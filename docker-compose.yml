@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+  proxy:
+    image: nginx
+    volumes:
+      - ./proxy:/etc/nginx/conf.d/proxy.conf
+    restart: always
+    networks:
+      - front
+    ports:
+      - 80:80
+    depends_on:
+      - web
+  api:
+    build: backend
+    command: sh -c "python manage.py migrate &&
+      python manage.py collectstatic --noinput &&
+      gunicorn --workers=5 reddit_clone.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - .:/api:rw # map data and files from parent directory in host to microservice directory in docker container
+      - static_volume:/api/static
+    image: api
+    expose:
+      - 8000
+    restart: "on-failure"
+  web:
+    image: web:1.0.0
+    build: frontend
+    restart: always
+    networks:
+      - front
+    depends_on:
+      - api
+
+volumes:
+  static_volume:
+  letsencrypt:
