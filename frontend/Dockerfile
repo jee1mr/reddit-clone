@@ -7,4 +7,4 @@ RUN npm install -g serve
 COPY . ./
 RUN npm run build
 EXPOSE 3001
-ENTRYPOINT ["serve", "-s", "build", "-p", "3001"]
+ENTRYPOINT ["serve", "-s", "build", "-p", "3000"]
