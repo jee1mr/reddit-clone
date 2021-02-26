@@ -13,14 +13,14 @@ services:
     depends_on:
       - web
   api:
+    image: api:1.0.0
     build: backend
     command: sh -c "python manage.py migrate &&
       python manage.py collectstatic --noinput &&
       gunicorn --workers=5 reddit_clone.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - .:/api:rw # map data and files from parent directory in host to microservice directory in docker container
+      - backend:/api:rw # map data and files from parent directory in host to microservice directory in docker container
       - static_volume:/api/static
-    image: api
     expose:
       - 8000
     restart: "on-failure"
